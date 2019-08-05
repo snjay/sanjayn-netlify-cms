@@ -5,7 +5,6 @@ subtitle: This is the home page subtitle
 meta:
   title: ''
 ---
-
 # Netlify CMS + React Starter
 
 A starter project for creating lightning-fast, offline-first websites with [Netlify CMS](https://netlifycms.org) and React.
@@ -18,7 +17,9 @@ A starter project for creating lightning-fast, offline-first websites with [Netl
 
 ## See also
 
-[Netlify CMS Docs](https://www.netlifycms.org/docs/)  
-[Netlify CMS Repo](https://github.com/netlify/netlify-cms)  
-[Hyperstatic](https://github.com/Jinksi/hyperstatic) – the same starter project minus Netlify CMS  
+[Netlify CMS Docs](https://www.netlifycms.org/docs/)\
+[Netlify CMS Repo](https://github.com/netlify/netlify-cms)\
+[Hyperstatic](https://github.com/Jinksi/hyperstatic) – the same starter project minus Netlify CMS\
 [Gatsby + Netlify CMS Starter](https://github.com/AustinGreen/gatsby-starter-netlify-cms)
+
+Something else
