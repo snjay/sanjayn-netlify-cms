@@ -12,7 +12,6 @@ import Contact from './views/Contact'
 import NoMatch from './views/NoMatch'
 import Nav from './components/Nav'
 import Footer from './components/Footer'
-import GithubCorner from './components/GithubCorner'
 import ServiceWorkerNotifications from './components/ServiceWorkerNotifications'
 import data from './data.json'
 import { slugify } from './util/url'
@@ -64,7 +63,6 @@ class App extends Component {
         <div className='React-Wrap'>
           <ScrollToTop />
           <ServiceWorkerNotifications reloadOnUpdate />
-          <GithubCorner url='https://github.com/Jinksi/netlify-cms-react-starter' />
           <Helmet
             defaultTitle={siteTitle}
             titleTemplate={`${siteTitle} | %s`}
@@ -105,6 +103,13 @@ class App extends Component {
               exact
               component={Contact}
               fields={this.getDocument('pages', 'contact')}
+              siteTitle={siteTitle}
+            />
+            <RouteWithMeta
+              path='/ss/'
+              exact
+              component={Contact}
+              fields={this.getDocument('pages', 'projects')}
               siteTitle={siteTitle}
             />
             <RouteWithMeta
