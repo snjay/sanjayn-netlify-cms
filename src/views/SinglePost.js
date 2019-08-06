@@ -16,11 +16,12 @@ export default ({ fields, nextPostURL, prevPostURL }) => {
           className='SinglePost--BackgroundImage'
           src={postFeaturedImage}
           alt={title}
+          opacity={0.5}
         />
       )}
 
       <div className='container skinny'>
-        <Link className='SinglePost--BackButton' to='/blog/'>
+        <Link className='SinglePost--BackButton' to='/projects/'>
           <ChevronLeft /> BACK
         </Link>
         <div className='SinglePost--Content relative'>

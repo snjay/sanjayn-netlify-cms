@@ -6,13 +6,13 @@
 }
 
 .SinglePost--BackButton {
-  color: white;
+  color: black;
   position: relative;
   display: flex;
   align-items: center;
-  font-weight: 600;
+  font-weight: 700;
   text-decoration: none;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.05em;
 }
 
 .SinglePost--BackButton svg {
@@ -28,8 +28,8 @@
 
 .SinglePost--Content {
   background: white;
-  margin-top: 30rem;
-  padding: 8rem 8rem 4rem 8rem;
+  margin-top: 5rem;
+  padding: 8rem 8rem 3rem 3rem;
 }
 
 @media screen and (max-width: 750px) {

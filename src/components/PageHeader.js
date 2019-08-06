@@ -16,7 +16,7 @@ const PageHeader = ({
   return (
     <div className={`PageHeader relative ${className}`}>
       {backgroundImage && (
-        <BackgroundImage src={backgroundImage} opacity={0.4} />
+        <BackgroundImage src={backgroundImage} opacity={0.2} />
       )}
       <div className='container relative'>
         <h1 className='PageHeader--Title'>{title}</h1>

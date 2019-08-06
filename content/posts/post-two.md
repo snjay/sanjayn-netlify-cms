@@ -1,6 +1,6 @@
 ---
 title: Post Two
-status: Published
+status: Draft
 date: '2018-03-28'
 postFeaturedImage: /images/uploads/vyouw5byhlc.jpeg
 excerpt: This is an excerpt of Post Two
