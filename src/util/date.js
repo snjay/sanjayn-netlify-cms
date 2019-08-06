@@ -1,2 +1,2 @@
 import _format from 'date-fns/format'
-export const dateFormatted = date => _format(date, 'MM.DD.YYYY')
+export const dateFormatted = date => _format(date, 'DD MMM YYYY')

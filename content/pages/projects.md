@@ -1,8 +1,6 @@
 ---
 title: Projects
-featuredImage: /images/uploads/isabella juskova.jpg
-subtitle: This is the home page subtitle
+subtitle: Here are things I've built – click on any of them to read more, source codes and demos.
 meta:
   title: ''
 ---
-# Projects

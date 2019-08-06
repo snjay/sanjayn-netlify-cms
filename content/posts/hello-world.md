@@ -1,6 +1,6 @@
 ---
 title: Hello World!
-status: Featured / Published
+status: Draft
 date: '2018-03-27'
 postFeaturedImage: /images/uploads/tim-marshall-155597.jpg
 excerpt: >-
