@@ -5,10 +5,8 @@ import Helmet from 'react-helmet'
 import ScrollToTop from './components/ScrollToTop'
 import Meta from './components/Meta'
 import Home from './views/Home'
-import About from './views/About'
 import Blog from './views/Blog'
 import SinglePost from './views/SinglePost'
-import Contact from './views/Contact'
 import NoMatch from './views/NoMatch'
 import Nav from './components/Nav'
 import Footer from './components/Footer'
@@ -54,9 +52,9 @@ class App extends Component {
     const posts = this.getDocuments('posts').filter(
       post => post.status !== 'Draft'
     )
-    const blogs = this.getDocuments('blogs').filter(
-      blog => blog.status !== 'Draft'
-    )
+    // const blogs = this.getDocuments('blogs').filter(
+    //   blog => blog.status !== 'Draft'
+    // )
     const categoriesFromPosts = getCollectionTerms(posts, 'categories')
     const postCategories = this.getDocuments('postCategories').filter(
       category => categoriesFromPosts.indexOf(category.name.toLowerCase()) >= 0
