@@ -9,12 +9,12 @@ import './Blog.css'
 
 export default ({
   fields,
-  posts = [],
+  blogs = [],
   postCategories = [],
   showFeatured = true
 }) => {
   const { title, subtitle, featuredImage } = fields
-  posts = _sortBy(posts, ['date']).reverse()
+  blogs = _sortBy(blogs, ['date']).reverse()
 
   return (
     <main className='Blog'>
@@ -28,7 +28,7 @@ export default ({
         <PostCategoriesNav categories={postCategories} />
       )}
 
-      {!!posts.length && <PostSection posts={posts} />}
+      {!!blogs.length && <PostSection posts={blogs} />}
     </main>
   )
 }

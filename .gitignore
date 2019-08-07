@@ -16,3 +16,6 @@ npm-debug.log
 *error.log
 
 src/data.json
+
+# pycharm
+.idea

@@ -6,8 +6,8 @@ postFeaturedImage: /images/uploads/numbers.jpg
 excerpt: Put in 4 numbers and a goal number to find all ways to reach the goal using +, –, × and ÷.
 ---
 
-## [**Try it out**](https://www.sanjayn.com/numbers)
-[Source](https://github.com/snjay/train-game)
+## [**Try it out**](https://make10.sanjayn.com/)
+[Source](https://github.com/snjay/make10)
 
 # *"Can you make 10?"*
 Have you ever sat down on a train to have your friend poke you, point to the train's carriage number and ask, "Can you make 10?"
