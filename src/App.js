@@ -16,7 +16,7 @@ import ServiceWorkerNotifications from './components/ServiceWorkerNotifications'
 import data from './data.json'
 import { slugify } from './util/url'
 import { documentHasTerm, getCollectionTerms } from './util/collection'
-import Projects from "./views/Projects";
+import Projects from './views/Projects';
 
 const RouteWithMeta = ({ component: Component, ...props }) => (
   <Route
@@ -53,6 +53,9 @@ class App extends Component {
 
     const posts = this.getDocuments('posts').filter(
       post => post.status !== 'Draft'
+    )
+    const blogs = this.getDocuments('blogs').filter(
+      blog => blog.status !== 'Draft'
     )
     const categoriesFromPosts = getCollectionTerms(posts, 'categories')
     const postCategories = this.getDocuments('postCategories').filter(
@@ -92,19 +95,6 @@ class App extends Component {
               component={Home}
               description={siteDescription}
               fields={this.getDocument('pages', 'home')}
-            />
-            <RouteWithMeta
-              path='/about'
-              exact
-              component={About}
-              fields={this.getDocument('pages', 'about')}
-            />
-            <RouteWithMeta
-              path='/contact'
-              exact
-              component={Contact}
-              fields={this.getDocument('pages', 'contact')}
-              siteTitle={siteTitle}
             />
             <RouteWithMeta
               path='/projects'
