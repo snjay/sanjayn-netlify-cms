@@ -1,13 +1,13 @@
 ---
-title: Make Ten
+title: Make 10
 status: Published
 date: '2019-03-28'
 postFeaturedImage: /images/uploads/numbers.jpg
 excerpt: Put in 4 numbers and a goal number to find all ways to reach the goal using +, –, × and ÷.
 ---
 
-## [**Try it out**](https://make10.sanjayn.com/)
-[Source](https://github.com/snjay/make10)
+[![Demo](/images/demo.svg)](https://make10.sanjayn.com/) [![Source](/images/source.svg)](https://github.com/snjay/make10)
+
 
 # *"Can you make 10?"*
 Have you ever sat down on a train to have your friend poke you, point to the train's carriage number and ask, "Can you make 10?"
@@ -65,13 +65,69 @@ permutations = (numbers) => {
 Next, we find the all combinations of operations that can be slipped between the numbers to find an answer. By definition, if you have 4 carriage numbers, you need to pick the 3 operations (with repetition) that will be placed between the numbers.
 
 ```
+// return all combinations of the operators
+// with repetition
 operationsCombinations = (ops, r) => {
   return Array(r).fill(ops).reduce((a, b) =>
     a.map(x => b.map(y => x.concat(y))).reduce((a, b) => a.concat(b)));
 };
 ```
 
-The reason it is viable to generate all possible number & operation combination in the first place is because the sample space of all possibilities is quite small. For example, with 4 numbers permutations (i.e. 4! = 24) and 4 standard operations with 3 operations chosen with  [repetition](https://en.wikipedia.org/wiki/Combination#Number_of_combinations_with_repetition) (i.e. n=4, k=3 means 6C3 = 20) there are only 24 x 20 = 480  total evaluations that need to be performed.
+The reason it is viable to generate all possible number & operation combination in the first place is because the sample space of all possibilities is quite small. For example, with 4 numbers permutations (i.e. 4! = 24) and 4 standard operations with 3 operations chosen with  [repetition](https://en.wikipedia.org/wiki/Combination#Number_of_combinations_with_repetition) (i.e. n=4, k=3 means 6C3 = 20) there are only 24 × 20 = 480  total evaluations that need to be performed.
+
+Every number permutation and operator combination are weaved together to create a post-fix expression. For example, if the `numbers` array is `[1, 2, 3, 4]` and operators are `[+,-,×]`, then the resulting post-fix expression would be: `12+3-4×`.
+
+```
+postFix = (numbers, operations) => {
+  let expr = [numbers[0]];
+  let rest = numbers.slice(1);
+  rest.forEach((r, i) => {
+    expr = expr.concat([r, operations[i]]);
+  });
+  return expr;
+};
+```
 
 ### (2) Evaluate expressions using a stack
+Now that we have generated all 480 post-fix expressions, we need to evaluate them to check if we've reached our goal number!
 
+Post-fix operations are an efficient representation of expressions because of their ability to be parsed and evaluated via a stack.
+
+```
+evaluate = (expr) => {
+  let stack = [];
+  expr.forEach((tok) => {
+    let token = parseInt(tok, 10);
+    if (isNaN(token)) {
+      // is operator
+      let operator = tok;
+      // e.g. expr = [4, 2, -]
+      //     stack = [4] -> [4, 2] -> [4, 2, -]
+      //     popped: -, then (first) 2 and then 4 (second)
+      //     stack.push(second - first) = stack.push(4-2);
+      let first = stack.pop();   // would pop 2
+      let second = stack.pop();  // would pop 4
+      switch (operator) {
+        case "+":
+          stack.push(second + first);
+          break;
+        case "–":
+          stack.push(second - first);
+          break;
+        case "×":
+          stack.push(second * first);
+          break;
+        case "÷":
+          stack.push(second / first);
+          break;
+        default:
+          console.log('Parse error.');
+      }
+    } else {
+      // is number
+      stack.push(n);
+    }
+  });
+  return stack[0];
+};
+```
