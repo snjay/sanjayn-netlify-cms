@@ -14,7 +14,7 @@ import ServiceWorkerNotifications from './components/ServiceWorkerNotifications'
 import data from './data.json'
 import { slugify } from './util/url'
 import { documentHasTerm, getCollectionTerms } from './util/collection'
-import Projects from './views/Projects';
+import Projects from './views/Projects'
 
 const RouteWithMeta = ({ component: Component, ...props }) => (
   <Route
@@ -138,7 +138,6 @@ class App extends Component {
                 />
               )
             })}
-
             <Route render={() => <NoMatch siteUrl={siteUrl} />} />
           </Switch>
           <Footer />
