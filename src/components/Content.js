@@ -1,9 +1,10 @@
 import React from 'react'
 import Marked from 'react-markdown'
 import PropTypes from 'prop-types'
-
 import { getImageSrc, getImageSrcset } from '../util/getImageUrl'
 import './Content.css'
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+import { prism as codeStyle } from 'react-syntax-highlighter/dist/esm/styles/prism'
 
 const encodeMarkdownURIs = (source = '') => {
   const markdownLinkRegex = /\[(?:\[[^\]]*\]|[^[\]])*\]\([ \t]*<?((?:\([^)]*\)|[^()])*?)>?[ \t]*(['"].*?\6[ \t]*)?\)/g
@@ -39,13 +40,22 @@ const HtmlBlock = ({ value }) => {
   )
 }
 
+const CodeBlock = ({value}) => {
+  return (
+    <SyntaxHighlighter language='javascript' style={codeStyle}>
+      {value}
+    </SyntaxHighlighter>
+  )
+}
+
 const Content = ({ source, src, className = '' }) => (
   <Marked
     className={`Content ${className}`}
     source={encodeMarkdownURIs(source || src)}
     renderers={{
       image: ImageWithSrcset,
-      html: HtmlBlock
+      html: HtmlBlock,
+      code: CodeBlock
     }}
   />
 )
