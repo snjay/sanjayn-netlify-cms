@@ -9,7 +9,7 @@ excerpt: Put in 4 numbers and a goal number to find all ways to reach the goal u
 [![Demo](/images/demo.svg)](https://make10.sanjayn.com/) [![Source](/images/source.svg)](https://github.com/snjay/make10)
 
 
-# *"Can you make 10?"*
+## "Can you make 10?"
 Have you ever sat down on a train to have your friend poke you, point to the train's carriage number and ask, "Can you make 10?"
 
 This project tells you how to make 10, given the 4 numbers in your train's carriage.
@@ -91,7 +91,13 @@ postFix = (numbers, operations) => {
 ### (2) Evaluate expressions using a stack
 Now that we have generated all 480 post-fix expressions, we need to evaluate them to check if we've reached our goal number!
 
-Post-fix operations are an efficient representation of expressions because of their ability to be parsed and evaluated via a stack.
+Post-fix operations are an efficient representation of expressions because they can be parsed and evaluated via standard stack operations.
+
+I built my own very basic expression evaluator as a way to learn from scratch. The input to the evaluator is a post-fix expression to be evaluated represented as an array. [Array.prototype.pop](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/pop) was used to retrieve tokens one by one from the stack. 
+
+The idea is simple, everytime you retrieve an operation (check if `isNan(token)` is `true`) then retrieve the next two numbers of the stack and perform the operation on. Repeat the process for each element in the stack. The result is a single number evaluated. 
+
+If the token from the stack is a number, then simply push it onto the stack so that it can be evaluated.
 
 ```
 evaluate = (expr) => {
@@ -131,3 +137,7 @@ evaluate = (expr) => {
   return stack[0];
 };
 ```
+
+Lastly, simply check if the resulting number is equivalent to the target that the user has in mind (e.g. 10) and display the result if so.
+
+[![Demo](/images/demo.svg)](https://make10.sanjayn.com/) [![Source](/images/source.svg)](https://github.com/snjay/make10)
