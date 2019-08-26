@@ -10,7 +10,7 @@ import './SinglePost.css'
 export default ({ fields, nextPostURL, prevPostURL }) => {
   const { title, date, postFeaturedImage, body, categories = [] } = fields
   return (
-    <article className='SinglePost section light'>
+    <article className='SinglePost section'>
       {postFeaturedImage && (
         <BackgroundImage
           className='SinglePost--BackgroundImage'
