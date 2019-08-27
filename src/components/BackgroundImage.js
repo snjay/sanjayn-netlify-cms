@@ -42,7 +42,7 @@ export default class BackgroundImage extends React.Component {
   }
 
   componentWillReceiveProps (nextProps) {
-    if (this.props.src === nextProps.src) return
+    if (this.props.src === nextProps.src) return;
 
     this.setState({
       src: getImageSrc(

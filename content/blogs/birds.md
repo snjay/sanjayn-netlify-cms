@@ -9,7 +9,7 @@ excerpt: This is a simple three.js rendering of some birds flying around in a ci
 ## [**Try it out**](https://www.sanjayn.com/birds)
 [Source](https://github.com/snjay/birds)
 
-# BLOGS Three.js birds experiment
+# Blog post #1
 
 
-This is a simple three.js rendering of some birds flying around in a circle 
+Something about me working on something 
