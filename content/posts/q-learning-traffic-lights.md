@@ -1,9 +1,9 @@
 ---
-title: Make 10
-status: Published
-date: '2019-03-28'
-postFeaturedImage: /images/uploads/numbers 3.jpg
-excerpt: Put in 4 numbers and a goal number to find all ways to reach the goal using +, –, × and ÷.
+title: Q-learning traffic lights
+status: Draft
+date: '2019-08-27'
+postFeaturedImage: /images/uploads/traffic.png
+excerpt: A Q-learning agent written in Python that learns the most optimal switching mechanism at a traffic intersection to reduce the delay of cars waiting at the intersection.
 ---
 
 [![Demo](/images/demo.svg)](https://make10.sanjayn.com/) [![Source](/images/source.svg)](https://github.com/snjay/make10)
