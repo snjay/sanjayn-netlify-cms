@@ -5,7 +5,7 @@ const outputDir = '/images/uploads/'
 const resizedDir = '/images/uploads/resized/'
 const imgixUrl = null // imgix web folder domain e.g. https://example.imgix.net (no trailing slash)
 
-const getImgixUrl = ({ path, size }) =>
+const getImgixUrl = ({path, size}) =>
   `${imgixUrl}${encodeURI(path)}?w=${size}&fit=max&auto=compress,format`
 
 const parseFilename = filename => {
@@ -20,20 +20,26 @@ const getImageSrcset = path => {
   if (!path || path.match(/^http/) || path.match(/svg$/) || window.CMS) {
     return null
   }
-  const { filename, extname } = parseFilename(path)
+  const {filename, extname} = parseFilename(path)
   const pathname = encodeURI(filename.replace(outputDir, resizedDir))
 
-  const srcset = sizes
+  if (extname === 'gif') {
+    return sizes
+      .map(
+        size =>
+          `${imgixUrl ? getImgixUrl({path, size}) : `${pathname}.${extname}`}`
+      )
+      .join(', ')
+  }
+  return sizes
     .map(
       size =>
         `${
           imgixUrl
-            ? getImgixUrl({ path, size })
-            : `${pathname}.${size}.${extname}`
-        } ${size}w`
+            ? getImgixUrl({path, size})
+            : `${pathname}.${size}.${extname}`} ${size}w`
     )
     .join(', ')
-  return srcset
 }
 
 const getImageSrc = (path, sizeRequested) => {
@@ -54,9 +60,12 @@ const getImageSrc = (path, sizeRequested) => {
     size = sizes[Math.ceil(sizes.length / 2)]
   }
 
-  const { filename, extname } = parseFilename(path)
+  const {filename, extname} = parseFilename(path)
   const pathname = encodeURI(filename.replace(outputDir, resizedDir))
-  if (imgixUrl) return getImgixUrl({ path, size })
+  if (imgixUrl) return getImgixUrl({path, size})
+  if (extname === 'gif') {
+    return `${pathname}.${extname}`
+  }
   return `${pathname}.${size}.${extname}`
 }
 

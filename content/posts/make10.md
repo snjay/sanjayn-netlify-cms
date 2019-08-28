@@ -8,7 +8,6 @@ excerpt: Put in 4 numbers and a goal number to find all ways to reach the goal u
 
 [![Demo](/images/demo.svg)](https://make10.sanjayn.com/) [![Source](/images/source.svg)](https://github.com/snjay/make10)
 
-
 ## "Can you make 10?"
 Have you ever sat down on a train to have your friend poke you, point to the train's carriage number and ask, "Can you make 10?"
 
