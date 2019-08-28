@@ -7,7 +7,7 @@ const sharp = require('sharp')
 const glob = util.promisify(globCb)
 const readFile = util.promisify(fs.readFile)
 
-const { sizes, imgixUrl } = require('../src/util/getImageUrl')
+const {sizes, imgixUrl} = require('../src/util/getImageUrl')
 
 const options = {
   inputDir: './public/images/uploads',
@@ -16,11 +16,14 @@ const options = {
   imageFormats: ['jpg', 'jpeg', 'png', 'gif', 'webp']
 }
 
-const saveImage = ({ buffer, size, outputFile }) => {
+const saveImage = ({buffer, size, outputFile}) => {
   return new Promise((resolve, reject) => {
     sharp(buffer)
-      .resize(size)
-      .withoutEnlargement()
+      .resize({
+        width: size,
+        height: size,
+        withoutEnlargement: true
+      })
       .toFile(outputFile, err => {
         if (err) {
           return reject(err)
@@ -31,7 +34,7 @@ const saveImage = ({ buffer, size, outputFile }) => {
   })
 }
 
-const saveImages = ({ buffer, filename }) => {
+const saveImages = ({buffer, filename}) => {
   console.log(`🎞  Processing ${filename}`)
   return Promise.all(
     options.sizes.map(async size => {
@@ -41,9 +44,9 @@ const saveImages = ({ buffer, filename }) => {
         extname
       )}.${size}${extname}`
       const outputFile = `${options.outputDir}/${newFilename}`
-      const fileExists = await doesFileExist({ filename: outputFile })
+      const fileExists = await doesFileExist({filename: outputFile})
       if (fileExists) return console.log(`↩️  ${outputFile} exists, skipping`)
-      return saveImage({ buffer, size, outputFile })
+      return saveImage({buffer, size, outputFile})
     })
   )
 }
@@ -52,11 +55,11 @@ const readFiles = files =>
   Promise.all(
     files.map(async filename => {
       const buffer = await readFile(filename)
-      return { filename, buffer }
+      return {filename, buffer}
     })
   )
 
-const doesFileExist = async ({ filename }) => {
+const doesFileExist = async ({filename}) => {
   try {
     await readFile(filename)
     return true
