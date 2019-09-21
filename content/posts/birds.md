@@ -6,9 +6,14 @@ postFeaturedImage: /images/uploads/birds.jpg
 excerpt: This is a simple three.js rendering of some birds flying around in a circle
 ---
 
-[![Demo](/images/demo.svg)](https://www.sanjayn.com/birds) [![Source](/images/source.svg)](https://github.com/snjay/birds)
+## Three.js birds flying
 
-# Three.js birds experiment
+This is a simple three.js rendering of some birds flying around in a circle.
 
+### Demo
 
-This is a simple three.js rendering of some birds flying around in a circle 
+See: https://birds.sanjayn.com/
+
+---
+
+[Source code](https://birds.sanjayn.com/)
