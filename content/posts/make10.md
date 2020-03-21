@@ -114,7 +114,7 @@ The reason it is viable to generate all possible number & operation combination 
 
 Every number permutation and operator combination are weaved together to create a post-fix expression.
 
-For example, if the `numbers` array is `[1, 2, 3, 4]` and operators are `[+,-,×]`, then the resulting post-fix expression would be: `12+3-4×`.
+For example, if `numbers` is `[1, 2, 3, 4]` and operators is `[+,-,×]`, then the resulting post-fix expression from the output of this function would be: `12+3-4×`.
 
 ```javascript
 const makePostFixExpr = (numList, opList) => {
@@ -126,6 +126,10 @@ const makePostFixExpr = (numList, opList) => {
   return expr;
 };
 ```
+
+We now have a way to generate postfix expressioons given a list of numbers and a list of operators. 
+
+Next, we work on writing the code that will read every generated post-fix expression in order to check whether it is equal to the goal.
 
 ### (2) Evaluate post-fix expressions using a stack
 
