@@ -1,17 +1,14 @@
 ---
 layout: post
 title: About
+author: Sanjay
 permalink: /about/
 ---
 
-This is the base Jekyll theme. You can find out more info about customizing your Jekyll theme, as well as basic Jekyll usage documentation at [jekyllrb.com](https://jekyllrb.com/)
+Hi, I'm Sanjay
 
-You can find the source code for Minima at GitHub:
-[jekyll][jekyll-organization] /
-[minima](https://github.com/jekyll/minima)
+I have recently graduated from double Software Engineering/Commerce degree the University of New South Wales (UNSW)
 
-You can find the source code for Jekyll at GitHub:
-[jekyll][jekyll-organization] /
-[jekyll](https://github.com/jekyll/jekyll)
+I work as a software engineer, involved in startups both as an engineer and a [founder](https://lumaway.com){:target="_blank_"}
 
-[jekyll-organization]: https://github.com/jekyll
+Feel free to shoot me an email at sanjay (at) sanjayn.com if you want to get in touch :)
