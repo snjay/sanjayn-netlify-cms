@@ -1,21 +1,8 @@
-# See http://help.github.com/ignore-files/ for more about ignoring files.
+_site
+.sass-cache
+.jekyll-cache
+.jekyll-metadata
+vendor
 
-# dependencies
-node_modules
-
-# testing
-coverage
-
-# production
-build
-
-# misc
+# MacOS
 .DS_Store
-npm-debug.log
-.env*.local
-*error.log
-
-src/data.json
-
-# pycharm
-.idea
