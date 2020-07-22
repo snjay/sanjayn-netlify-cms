@@ -14,9 +14,10 @@ This project tells you how to make 10, given the 4 numbers in your train's carri
 
 It's extensible enough find a solution to any sequence of 4 numbers and a goal number.
 
-## Demo
+### Demo
 
 See: [https://make10.sanjayn.com/](https://make10.sanjayn.com/)
+
 
 ## Motivation
 
@@ -30,14 +31,17 @@ This was also a pure client-side web application as I did not want to spin up a 
 
 It boils down to two steps:
 
-1. Generate all possible post-fix expressions involving the 4 numbers with the operations (+, –, x, ÷)
-2. Evaluate each postfix operation by using standard stack operations and check if the result is equal to the goal
+1. Generate all possible post-fix expressions with the 4 given numbers and the operations (+, –, x, ÷).
+2. Evaluate each post-fix operation using a [stack](https://en.wikipedia.org/wiki/Stack_(abstract_data_type)).
+3. Check if the result equals the goal number (e.g. "does it equal 10?")
 
-### (1) Generate all possible post-fix expressions
+### (1) Generate all post-fix expressions
 
-Suppose the numbers in the train carriage are 1, 2, 3 and 4, and the operations are +, –, x, ÷. Generate all possible post-fix expressions with the train carriage numbers and available operations. 
+To generate all possible post-fix expressions, we need to use some sort of [combinatorics](https://en.wikipedia.org/wiki/Combinatorics). The idea is to generate all possible expressions after all.
 
 #### Number permutations
+
+> *Permutations*: (loosely speaking) is an arrangement of its members into a sequence or linear order, or if the set is already ordered, a rearrangement of its elements. 
 
 We generate all possible permutations of the train carriage numbers using the following code.
 
@@ -70,6 +74,8 @@ const permutations = (items) => {
   return perms;
 };
 ```
+
+Suppose the numbers in the train carriage are 1, 2, 3, 4 and the operations are +, –, x, ÷.
 
 For example `permutations([1,2,3])` should return 6 (= 3!) expressions of the input list. Each item in the list is a permutation of the original.
 
@@ -126,7 +132,9 @@ The reason it is viable to generate all possible number & operation combination 
 
 Every number permutation and operator combination are weaved together to create a post-fix expression.
 
-For example, if `numbers` is `[1, 2, 3, 4]` and operators is `[+,-,×]`, then the resulting post-fix expression from the output of this function would be: `12+3-4×`.
+For example, if `numbers` is `[1, 2, 3, 4]` and operators is `[+, -, ×]`, then the resulting post-fix expression from the output of this function would be
+
+```1 2 + 3 - 4 ×```
 
 ```javascript
 const makePostFixExpr = (numList, opList) => {
