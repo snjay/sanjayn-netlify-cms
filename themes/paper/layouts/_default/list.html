@@ -29,7 +29,7 @@
 </article>
 {{- end }}
 
-{{- if gt $paginator.TotalPages 1 }}
+<!-- {{- if gt $paginator.TotalPages 0 }} -->
 <footer class="page-footer">
   <nav class="pagination">
     {{- if $paginator.HasPrev }}
@@ -40,6 +40,6 @@
     {{- end }}
   </nav>
 </footer>
-{{- end }}
+<!-- {{- end }} -->
 
 {{- partial "footer.html" . }}
