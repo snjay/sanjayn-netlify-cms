@@ -10,7 +10,7 @@ This project involved building a Q-learning agent that learns the most optimal s
 
 At each tick, the Q-learning agent assesses the current environment state in order to choose an action that will maximise the reward. This reward-seeking behaviour takes into account future rewards via a supplied Γ (Gamma) parameter.
 
-![Traffic simulation gif](/assets/traffic_simulator.gif){:class="img-responsive"}
+![Traffic simulation gif](/traffic_simulator.gif)
 
 ## Reinforcement learning
 
@@ -29,7 +29,7 @@ Finally, the agent selects its policy such that there is an element of explorati
 
 Q-learning (Orange) vs switching automatically every 3 ticks (Blue)
 
-![Source](/assets/q-learning-results.png){:class="img-responsive"}
+![Source](/q-learning-results.png)
 
 X-axis are clock ticks (in 1000s) and the y-axis is the penalty score. The penalty score is given by the sum total of the number of cars waiting at both intersections every 1000 clock ticks.
 

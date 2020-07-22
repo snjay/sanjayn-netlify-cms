@@ -3,21 +3,28 @@ layout: post
 title: Make 10
 author: Sanjay
 date: '2019-03-28'
-postFeaturedImage: /images/uploads/numbers 3.jpg
-excerpt: Put in 4 numbers and a goal number to find all ways to reach the goal using +, –, × and ÷.
+tags: ['javascript', 'demo']
 ---
 
 Have you ever sat down on a train to have your friend poke you, point to the train's carriage number and ask, "Can you make 10?"
 
 This project tells you how to make 10, given the 4 numbers in your train's carriage.
 
-![Train numbers](/assets/numbers.png){:class="img-responsive"}
+![Train numbers](/numbers.png)
 
-Infact, it's extensible to act as a solver to find an arithmetic solution to any sequence of 4 numbers and a goal.
+It's extensible enough find a solution to any sequence of 4 numbers and a goal number.
 
 ## Demo
 
 See: [https://make10.sanjayn.com/](https://make10.sanjayn.com/)
+
+## Motivation
+
+I wanted to create a web app so anyone could check answers on the train from their phone.
+
+I made it harder for myself by not using external math libraries such as [itertools](https://docs.python.org/3/library/itertools.html). This was so that I would get a deeper understanding of the algorithms that I usually rely on.
+
+This was also a pure client-side web application as I did not want to spin up a server.
 
 ## How it works
 
@@ -26,11 +33,9 @@ It boils down to two steps:
 1. Generate all possible post-fix expressions involving the 4 numbers with the operations (+, –, x, ÷)
 2. Evaluate each postfix operation by using standard stack operations and check if the result is equal to the goal
 
-An additional constraint that I placed upon myself for this project was to implement all permutations and combinations library functions without using external mathematical libraries.  I initially wrote all the code in python using the wonderful [itertools](https://docs.python.org/3/library/itertools.html) library but wanted to write a pure client-side web version of it so I didn't need to spin up a server.
-
 ### (1) Generate all possible post-fix expressions
 
-The first step is to generate a list of all possible expressions that are possible with the given train carriage numbers and the list of operations. Let us say the numbers in the train carriage are 1, 2, 3 and 4. Let us also suppose we are using the standard arithmetic operations used in the basic variant of the game  (+, –, x, ÷).
+Suppose the numbers in the train carriage are 1, 2, 3 and 4, and the operations are +, –, x, ÷. Generate all possible post-fix expressions with the train carriage numbers and available operations. 
 
 #### Number permutations
 
@@ -66,22 +71,26 @@ const permutations = (items) => {
 };
 ```
 
-As an example, calling `permutations(['a', 'b', 'c'])` returns 3! (= 6) permutations of the input list.
+For example `permutations([1,2,3])` should return 6 (= 3!) expressions of the input list. Each item in the list is a permutation of the original.
 
 ```javascript
-[['a', 'b', 'c'],  // permutation 1
- ['b', 'a', 'c'],  // permutation 2
- ['b', 'c', 'a'],  // permutation 3
- ['a', 'c', 'b'],  // permutation 4
- ['c', 'a', 'b'],  // permutation 5
- ['c', 'b', 'a']]  // permutation 6
+[[1, 2, 3],  // permutation 1
+ [2, 1, 3],  // permutation 2
+ [2, 3, 1],  // permutation 3
+ [1, 3, 2],  // permutation 4
+ [3, 1, 2],  // permutation 5
+ [3, 2, 1]]  // permutation 6
 ```
 
 #### Operator combinations
 
-Next, we find the all combinations of operations that can be slipped between the numbers to find an answer.
+Next, find all the different ways the operations go between the numbers.
 
-By definition, if you have 4 carriage numbers in your train carriage, you need to pick the 3 (4-1) operations with repetition that will be placed in between the numbers.
+For 4 numbers, only be 3 operations can go between the numbers.
+
+```plain
+1 + 2 x 3 + 4
+```
 
 ```javascript
 // product(items, r): Generates r-length combinations of items with
