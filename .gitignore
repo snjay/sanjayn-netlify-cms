@@ -1,0 +1,5 @@
+# Hugo build
+public/
+
+# MacOS	
+.DS_Store 
