@@ -83,7 +83,10 @@
     <header class="header">
       <nav class="nav">
         <h1 class="logo"><a href="{{ "" | absURL }}">{{ .Site.Title }}</a></h1>
-        <p class="logo"><a href="{{ "/about/" | absURL }}">About</a></p>
+        <div style="display: flex;">
+          <a class="logo" href="{{ "https://notes.sanjayn.com/" | absURL }}">Notes</a>
+          <a class="logo" href="{{ "/about/" | absURL }}">About</a>
+        </div>
         {{- if .Site.Menus.main }}
         <ul class="menu">
           {{- range .Site.Menus.main }}

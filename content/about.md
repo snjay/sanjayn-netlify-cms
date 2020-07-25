@@ -6,7 +6,7 @@ type: "page"
 
 Hi, I'm Sanjay
 
-I've recently graduated from the University of New South Wales (UNSW) with a double in Software Engineering and Commerce.
+I've recently graduated from the University of New South Wales (UNSW) with a double degree in Software Engineering (Honours) and Commerce.
 
 Currently, I work as a software engineer involved in startups both as an engineer and a [founder](https://lumaway.com).
 

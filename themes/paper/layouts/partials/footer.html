@@ -11,4 +11,5 @@
   hljs.initHighlightingOnLoad();
 </script>
 </body>
+{{ if .Params.katex}}{{ partial "katex.html" . }}{{ end }}
 </html>
