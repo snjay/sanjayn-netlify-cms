@@ -2,3 +2,5 @@ baseURL = "https://sanjayn.com/"
 languageCode = "en-us"
 title = "Sanjay N"
 theme = "paper"
+
+googleAnalytics = "UA-173560700-1"
