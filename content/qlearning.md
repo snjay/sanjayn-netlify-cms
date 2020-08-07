@@ -3,7 +3,7 @@ layout: post
 title: Q-learning traffic lights
 author: Sanjay
 date: '2019-08-27'
-excerpt: A Q-learning agent written in Python that learns the most optimal switching mechanism at a traffic intersection to reduce the delay of cars waiting at the intersection.
+summary: 'A Q-learning agent written in Python that learns the most optimal switching mechanism at a traffic intersection to reduce the delay of cars waiting at the intersection.'
 ---
 
 This project involved building a Q-learning agent that learns the most optimal switching mechanism at a traffic intersection to reduce the delay of cars waiting at the intersection.

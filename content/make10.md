@@ -2,8 +2,9 @@
 layout: post
 title: Make 10
 author: Sanjay
-date: '2019-03-28'
+date: '2016-01-14'
 tags: ['javascript', 'demo']
+cover: "/numbers.png"
 ---
 
 Have you ever sat down on a train to have your friend poke you, point to the train's carriage number and ask, "Can you make 10?"
@@ -17,7 +18,6 @@ It's extensible enough find a solution to any sequence of 4 numbers and a goal n
 ### Demo
 
 See: [https://make10.sanjayn.com/](https://make10.sanjayn.com/)
-
 
 ## Motivation
 
