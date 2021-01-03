@@ -29,7 +29,7 @@ This was also a pure client-side web application as I did not want to spin up a 
 
 ## How it works
 
-It boils down to two steps:
+It boils down to three steps:
 
 1. Generate all possible post-fix expressions with the 4 given numbers and the operations (+, –, x, ÷).
 2. Evaluate each post-fix operation using a [stack](https://en.wikipedia.org/wiki/Stack_(abstract_data_type)).
@@ -41,7 +41,7 @@ To generate all possible post-fix expressions, we need to use some sort of [comb
 
 #### Number permutations
 
-> *Permutations*: (loosely speaking) is an arrangement of its members into a sequence or linear order, or if the set is already ordered, a rearrangement of its elements. 
+> *Permutations*: (loosely speaking) is an arrangement of its members into a sequence or linear order, or if the set is already ordered, a rearrangement of its elements.
 
 We generate all possible permutations of the train carriage numbers using the following code.
 
@@ -118,7 +118,7 @@ const product = (items, r) => {
 };
 ```
 
-The combinations are produced by generting r-length combinations of the numbers list with repetition. 
+The combinations are produced by generting r-length combinations of the numbers list with repetition.
 
 As an example, `product(['a', 'b', 'c'], 2)` would generate 2-length combinations with repetitions would result in:
 
@@ -147,7 +147,7 @@ const makePostFixExpr = (numList, opList) => {
 };
 ```
 
-We now have a way to generate postfix expressioons given a list of numbers and a list of operators. 
+We now have a way to generate postfix expressions given a list of numbers and a list of operators.
 
 Next, we work on writing the code that will read every generated post-fix expression in order to check whether it is equal to the goal.
 
