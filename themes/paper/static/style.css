@@ -425,9 +425,9 @@ img {
   display: none;
 }
 /* inline */
-.post-content .highlight span {
-  background: transparent !important;
-}
+/* .post-content .highlight span {
+  background: none !important;
+} */
 
 .post-content code {
   margin-left: 4px;
