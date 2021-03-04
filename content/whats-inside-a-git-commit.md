@@ -19,11 +19,11 @@ When someone learns git, they’re told to **[✨memorize the magic commands✨]
 
 ## The git object database
 
-The easiest way to explain a commit is that it is a text file stored within the `.git/objects` folder. Git stores the file with all the info about a commit: who made it, when it was made and the state of the directory.
+The easiest way to explain a commit is that it is a text file stored within the `.git/objects` directory. Git stores this file with all the information about a commit: who made it, when it was made, the state of the directory and some other metadata.
 
 The long answer involves a few moving parts. To keep track of your files (across all your commits), git uses an internal database called the **git object database**. The database doesn't track your current directory, but also your directory when you made previous commits too.
 
-The database stores three[^1] types of objects. Starting from from simplest to most complex they are:
+The database stores three types of objects. Technically there are four but we will ignore [tags](https://git-scm.com/book/en/v2/Git-Basics-Tagging) for now. Starting from from simplest to most complex they are:
 
 1. Blob objects
 2. Tree objects
@@ -57,7 +57,7 @@ $ find .git/objects -type f
 .git/objects/bb/6f156e3e1b09ba7879c06a5a01844c042ef95e
 ```
 
-It seems a new object has appeared in the database. Take a look at the output from the last command above with the output you have, they should be the same.
+It seems a new object has appeared in the database. Compare the output from the last command above with the output you have, they should be the same.
 
 How is this possible? It's because git is a **content-addressable system**. If the object stored in the db is the same irrespective of what we named the file, it means git isn't looking at the name of the file to create the object. It's actually looking at the contents of the file.
 
@@ -74,23 +74,22 @@ _Note: 'git cat-file' is not a command you'd use often, it is an internal helper
 
 **What is the staging area?**
 
-You might ask what I meant by the 'staging area' when adding git files with 'git add'. The staging area is a middle-ground between the working directory and .git directory. If you add a file using `git add` you would be moving it from the current working directory into the staging area.
+You might ask what the 'staging area' means when using 'git add'. The staging area is a middle-ground between the working directory and .git directory. If you add a file using `git add` you would be moving it from the current working directory into the staging area.
 
 ![add-to-staging-area](/stages-add.png)
 
-Think of it as a real-life 'stage', you're presenting whatever files you wish to commit up onto the stage.
+Think of it as a real-life 'stage'. You are _presenting_ the files you wish to commit up onto the stage.
 
 ### Trees
-
-But you want to do more than write a single file to your repository, right? You might even venture out and add a fancy thing called 'folders'? Unbelievable.
+But you want to do more than write a single file to your repository, right? You might even venture out and add a fancy thing called 'folders'.
 
 Well it's your lucky day because the second type of object in the database are git trees.
 
 **Git trees** represent a group of files together.
 
-Git borrows heavily from UNIX tree-like file structure to represent the group of files. What this means is that a tree can point to either (1) a blob or (2) a sub-tree. Individual files are represented as blobs, whilst directories are represented as a sub-tree themselves.
+Git borrows from the UNIX tree-like file structure to represent a group of files. A tree can either point to (1) a blob or (2) another sub-tree. Blobs represent individual files, whilst trees represent directories. Each tree can have one or more individual files (blobs). Any sub-directory inside a tree would be a part of it's own tree.
 
-A tree can only be created once your files have been placed into in the staging area. Currently only one of our files are staged, we can confirm this with `git status`.
+Before we create a tree, we should stage a few more files. Only staged files can create trees. Currently only one file is staged, we can confirm this with `git status`.
 
 ```text
 $ git status
