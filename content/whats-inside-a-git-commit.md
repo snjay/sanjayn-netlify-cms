@@ -2,314 +2,406 @@
 title: "What's inside a git commit?"
 date: 2021-03-04T11:04:20+11:00
 tags: ['git', 'sha-1']
-draft: false
-katex: true
+draft: false,
 showCoffee: true
 ---
 
 ![commits-image](https://images.unsplash.com/photo-1556075798-4825dfaaf498?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=2110&q=80)
 
-Git is a version control system (VCS) that helps you track progress of your repository over time. One of the most important parts of using git is the commit system.
+Git is a version control system (VCS) that helps you track progress of your repository over time. One of the essential parts of using git is learning the commit system.
 
-When someone learns git, they’re told to **[✨memorize the magic commands✨](https://xkcd.com/1597/)**, often without knowing what's happening under the hood. So the goal of this post is to dig deeper and understand:
+However, when someone learns git and the commit system for the first time they are told to **[✨memorize the magic commands✨](https://xkcd.com/1597/)**, without understanding what's happening under the hood. So the goal of this post is to dig deeper and understand:
 
-1. How commits are represented internally,
-2. What commit ids mean, and
-3. How commit ids are generated
+1. [How commits are stored internally](#1-how-commits-are-stored-internally)
+2. [What information a commit stores](#2-what-information-a-commit-stores)
+3. [How commit ids are generated](#3-how-commit-ids-are-generated)
 
-## The git object database
+This post will not be talking about how to use git. It will be looking at the underlying internals of git. Thus, this post assumes  you are familiar with using git and the command line. If not, I recommend [Atlassian's git tutorials](https://www.atlassian.com/git/tutorials) to get started :)
 
-The easiest way to explain a commit is that it is a text file stored within the `.git/objects` directory. Git stores this file with all the information about a commit: who made it, when it was made, the state of the directory and some other metadata.
+## 1. How commits are stored internally
 
-The long answer involves a few moving parts. To keep track of your files (across all your commits), git uses an internal database called the **git object database**. The database doesn't track your current directory, but also your directory when you made previous commits too.
+The short answer is that a commit is a text file stored within the `.git/objects` directory. Git stores this file with all the information about a commit: who made it, when it was made, the state of the directory and some other metadata.
 
-The database stores three types of objects. Technically there are four but we will ignore [tags](https://git-scm.com/book/en/v2/Git-Basics-Tagging) for now. Starting from from simplest to most complex they are:
+The long answer involves understanding the things which go into making up what a 'commit' is.
 
-1. Blob objects
+### Git's Object Database
+
+To keep track of your files, git uses an internal database called the **object database**. This database is in the `.git/objects` directory and is at the core of what drives git!
+
+#### What does the database store?
+
+The database stores three types of objects. Technically there are four, but we will ignore [tags](https://git-scm.com/book/en/v2/Git-Basics-Tagging) in this post. Starting from the simplest and moving up to the most complex, they are:
+
+1. Blob objects (Simplest)
 2. Tree objects
-3. Commit objects
+3. Commit objects (Complex)
 
-The `.git/objects` directory houses the database for a git repository. This database keeps track of the directory across every commit made - it’s at the core of what drives git!
+Commit objects are the most complex because they house blob objects and tree objects inside them. So, to understand commit objects we need to venture to the land of blob objects first. Then, tree objects and then move onto commit objects last.
 
-Let’s start with the simplest object type: **blobs**, and work up to **commits**.
+### Blob objects
 
-### Blobs
+A **blob object** represents a single file in the working directory. The acronym stands for '**b**inary **l**arge **ob**ject' and is the simplest object type that git deals with.
 
-**Blobs** represents a single file stored in the working directory. The acronym stands for '**b**inary **l**arge **ob**ject' and is the simplest object type that git deals with.
+When a single file is added to the object database, git stores the file as a blob in the database.
 
-When a single file is added to the object database (e.g. `file.txt`), git stores the file as a blob in the object database. Let's run a quick example and see this happening in action. Replace `YOUR_FILE_NAME` with any file name you'd like.
+#### Creating a blob object
 
-```text
-$ mkdir test && cd test
-
-$ echo "mangoes are great" > YOUR_FILE_NAME
-```
-
-Next, let's add our files using 'git add' to the staging area, and then take a peek in the object database at `.git/objects/`.
+Let's run a quick example and see this happening in action. Say we're building a repository to store quotes from the 2003 cult-classic movie, The Room.
 
 ```text
+$ mkdir the-room-quotes && cd $_
 $ git init
-$ find .git/objects -type f
-// should be empty
 
-$ git add .
-$ find .git/objects -type f
-.git/objects/bb/6f156e3e1b09ba7879c06a5a01844c042ef95e
+$ echo Hi doggy! > quote1.txt
 ```
 
-It seems a new object has appeared in the database. Compare the output from the last command above with the output you have, they should be the same.
-
-How is this possible? It's because git is a **content-addressable system**. If the object stored in the db is the same irrespective of what we named the file, it means git isn't looking at the name of the file to create the object. It's actually looking at the contents of the file.
-
-Do not attempt to open these files using commands such as 'cat', because they are compressed using `zlib`. Instead use `git cat-file -p <file>` if you'd like to take a look inside the file. 
+Creating a new file in the working directory does not add it into the object database. We can check the object database to see that it is empty:
 
 ```text
-$ git cat-file -p bb6f156e3e1b09ba7879c06a5a01844c042ef95e
-mangoes are great
+$ find .git/objects -type f
+( should be empty )
 ```
 
-This should show the contents of our file we created.
+#### Write blob into object database
 
-_Note: 'git cat-file' is not a command you'd use often, it is an internal helper function. There are other types of these helpers, called 'plumbing' commands. For more information take a look at: [Plumbing and Porcelain](https://git-scm.com/book/en/v2/Git-Internals-Plumbing-and-Porcelain)._
-
-**What is the staging area?**
-
-You might ask what the 'staging area' means when using 'git add'. The staging area is a middle-ground between the working directory and .git directory. If you add a file using `git add` you would be moving it from the current working directory into the staging area.
+In order to write objects into the database, we have to add this file to the staging area using 'git add'. The **staging area** is a middle-ground between the working directory and .git directory. If you add a file using `git add` you would be moving it from the current working directory into the staging area.
 
 ![add-to-staging-area](/stages-add.png)
 
-Think of it as a real-life 'stage'. You are _presenting_ the files you wish to commit up onto the stage.
-
-### Trees
-But you want to do more than write a single file to your repository, right? You might even venture out and add a fancy thing called 'folders'.
-
-Well it's your lucky day because the second type of object in the database are git trees.
-
-**Git trees** represent a group of files together.
-
-Git borrows from the UNIX tree-like file structure to represent a group of files. A tree can either point to (1) a blob or (2) another sub-tree. Blobs represent individual files, whilst trees represent directories. Each tree can have one or more individual files (blobs). Any sub-directory inside a tree would be a part of it's own tree.
-
-Before we create a tree, we should stage a few more files. Only staged files can create trees. Currently only one file is staged, we can confirm this with `git status`.
-
 ```text
-$ git status
-xxx
-```
-
-How about we create another file and stage it.
-
-```text
-$ echo mangoes2 > file2.txt
 $ git add .
+```
+
+```text {hl_lines=[2]}
 $ find .git/objects -type f
-.git/objects/3b/da87e5cf72eada744b504213d49357b3a37b00
-.git/objects/01/bf8f94800cafb22f589104b3c6a9743c84b053
+.git/objects/7a/aeff605349ee86ab6ed6f9d70ce5a617b596e9
 ```
 
-As you can see, there are now two objects in the database, each of these represent the two files we created. You can use a neat little git helper command called `git cat-file` to view these files. The `-t` flag prints out the object's type. In this case, `3bda87e5cf72eada744b504213d49357b3a37b00` is a blob. If you use a `-p` flag, you can pretty-print the contents of the git object too. (Don't try open these files using a regular `cat` command because the contents of these plain text files are compressed with zlib).
+It seems a new object has appeared in the database. But what's inside it?
+
+#### Viewing an blob's contents
+
+Do not attempt to open these files using commands such as 'cat', because they are compressed using `zlib`. Instead use `git cat-file -p <id>` if you'd like to take a look inside the file.
 
 ```text
-$ git cat-file -t 3bda87e5cf72eada744b504213d49357b3a37b00
-blob
-$ git cat-file -p 3bda87e5cf72eada744b504213d49357b3a37b00
-mangoes are great
+$ git cat-file -p 7aaeff605349ee86ab6ed6f9d70ce5a617b596e9
+Hi doggy!
 ```
 
-To create a tree, we can use the `git write-tree`. This command creates a tree based on the currently staged files.
+> _Note: 'git cat-file' is not a command you'd use often when using git, it is an internal helper function. There are other types of these helpers, called 'plumbing' commands. For more information take a look at: [Plumbing and Porcelain](https://git-scm.com/book/en/v2/Git-Internals-Plumbing-and-Porcelain)._
+
+### Tree objects
+
+**Git trees** are a grouping of files to represent the state of the working directory. Trees store a _snapshot_ of the entire working directory.
+
+Blobs are cool, but you want to do more than write a bunch of single files to your repository, right? There needs to be some way of grouping a bunch of files to call it your 'working directory.' This is what the second type of object: git trees do.
+
+A common misconception about git is that it only stores the changes with every commit made. **This is not true.** Git actually stores a snapshot of the entire working directory at the time of the commit made.
+
+#### Similarity to UNIX tree-like structure
+
+Git borrows from UNIX's tree-like file system to take a snapshot of your working directory. When creating a tree, git starts from the root directory to begin classifying files. Files in the root directory are recorded as blob objects, and sub-directories are recorded as tree objects. For all sub-directories, git repeats the same operation until reaching the bottom-most directory. After finishing up, the hierarchy of your working directory will look like a 'tree.'
+
+#### Adding in more files
+
+Currently, only one file is in our working directory. If we were to create a tree at this point it would look something like this.
+
+![tree-one-object.png](/tree-one-object.png)
+
+Let's add (and stage) a few more files and sub-directories before we create a tree.
 
 ```text
+$ echo You are just a chicken, cheep cheep cheep cheep > quote2.txt
+$ git add .
+```
+
+There are now two objects in the database. The new object represents the new file we added to the staging area. Our hypothetical tree object would look like this.
+
+![tree with two blobs](/tree-two-objects.png)
+
+```text {hl_lines=[1]}
+.git/objects/8a/f3792c43bba0018127f036a6717c508e4b9cea
+.git/objects/7a/aeff605349ee86ab6ed6f9d70ce5a617b596e9
+```
+
+Let's add a third quote inside a sub-directory. The new sub-directory is only for quotes from the movie directed towards Mark.
+
+```text
+$ mkdir to-mark
+$ echo Ha ha ha what a story Mark > to-mark/quote3.txt
+$ git add .
+```
+
+```text {hl_lines=[1]}
+.git/objects/94/52e922fdbfa6ecabd62fd29fec3e821625c5f6
+.git/objects/8a/f3792c43bba0018127f036a6717c508e4b9cea
+.git/objects/7a/aeff605349ee86ab6ed6f9d70ce5a617b596e9
+```
+
+#### Creating the tree
+
+Now that we have some extra files and sub-directories, we can create a tree to store a snapshot of the repo's hierarchy:
+
+```text
+├── quote1.txt
+├── quote2.txt
+└── to-mark
+    └── quote3.txt
+```
+
+To create a tree, we can use the `git write-tree` command. This command creates a tree based on the files currently in the staging area and outputs the tree's id.
+
+```text {hl_lines=[2]}
 $ git write-tree
-a6dfdfda8182ac27a4f7ec9a3ef7fea562008686
-$ find .git/objects -type f
-.git/objects/3b/da87e5cf72eada744b504213d49357b3a37b00
-.git/objects/01/bf8f94800cafb22f589104b3c6a9743c84b053
-.git/objects/a6/dfdfda8182ac27a4f7ec9a3ef7fea562008686
+d77cacbb84e5369b537cd62d26d533e04798fab1                 <--- root tree id
 ```
 
-As you can see, there are now three git objects - the newest one being the tree object itself (`hash`). Taking a look inside the newly created tree object, we can see the two blobs inside it
-
+```text {hl_lines=[2, 3]}
+.git/objects/94/52e922fdbfa6ecabd62fd29fec3e821625c5f6
+.git/objects/9c/8563e58a379f1f3e5366075401ea9a6f470591    <--- ?
+.git/objects/d7/7cacbb84e5369b537cd62d26d533e04798fab1    <--- root tree object
+.git/objects/8a/f3792c43bba0018127f036a6717c508e4b9cea
+.git/objects/7a/aeff605349ee86ab6ed6f9d70ce5a617b596e9
 ```
-$ git cat-file -p a6dfdfda8182ac27a4f7ec9a3ef7fea562008686
-100644 blob 3bda87e5cf72eada744b504213d49357b3a37b00	file1.txt
-100644 blob 01bf8f94800cafb22f589104b3c6a9743c84b053	file2.txt
-```
 
-100644 is borrowed from the UNIX file system and represents a normal file mode. Obviously the two items inside the tree are blobs (2nd column) with their object ids being displayed in the 3rd column. Lastly the file names are stored in 4th column.
+Hang on. There's two new objects in the database when we created a tree?
 
-This brings us to the commit object.
+- We know 'd7/7cacbb84e5369b537cd62d26d533e04798fab1' is the root tree for the entire repository (what was returned as the output to the 'write-tree' command).
+- '9c/8563e58a379f1f3e5366075401ea9a6f470591' is the tree created to represent the new sub-directory for quotes directed to Mark.
 
-### Commits
+Remember that git starts creating the tree from the root directory. It moves downwards and marks any sub-directories as separate tree objects . Thus, '9c/8563e58a379f1f3e5366075401ea9a6f470591' was created to capture the sub-directory called 'to-mark' inside our repo.
 
-Blobs store individual files. Trees help store the entire working directory together, so what do commits store then?
+#### Looking inside the tree objects
 
-A **git commit** is a snapshot of a repository at some point in time, along with extra metadata.
-
-The best way to figure out what's inside a commit is to create one and inspect it! We can create a commit based on a tree by using the `commit-tree` command. We'll also pipe in the commit message for the commit via stdin.
+If we take a look at the root tree object ('d77cacb'), we can see the two blobs and a tree inside it.
 
 ```text
-$ echo 'Wrote about my love of mangoes' | git commit-tree a6dfdfd
-e230e577b1c73e2d94ddafbffbe77fc1283d7793                <-- commit id
+$ git cat-file -p d77cacb
+100644 blob 7aaeff605349ee86ab6ed6f9d70ce5a617b596e9    quote1.txt
+100644 blob 8af3792c43bba0018127f036a6717c508e4b9cea    quote2.txt
+040000 tree 9c8563e58a379f1f3e5366075401ea9a6f470591    to-mark
 ```
 
-Let's see what's inside the object database. Notice that we can use the shortened version of the hash (`a6dfdfd`) for convenience here.
+> _Note: `d77cacb` is the shortened version of the longer hash. You can also use short hashes in place of long hashes as long as you supply enough characters. See the [Short SHA-1](https://git-scm.com/book/en/v2/Git-Tools-Revision-Selection) section for more information._
+
+Looking at the first row of the output,
+
+- 100644 is borrowed from UNIX, meaning the object is in normal file mode.
+- blob is the type of the object.
+- 7aaeff605349ee86ab6ed6f9d70ce5a617b596e9 is the id of the file.
+- quote1.txt is the name of the file inside the tree
+
+The last line's output points to another tree. This other tree is the sub-directory we created to store Mark's quotes. If we look inside the sub-directory tree ('9c8563e'), it shows the single 'quote3.txt' file.
 
 ```text
-$ find .git/objects -type f
-.git/objects/3b/da87e5cf72eada744b504213d49357b3a37b00   <-- blob (YOUR_FILE_NAME)
-.git/objects/01/bf8f94800cafb22f589104b3c6a9743c84b053   <-- blob (file2.txt)
-.git/objects/a6/dfdfda8182ac27a4f7ec9a3ef7fea562008686   <-- tree object
-.git/objects/e2/30e577b1c73e2d94ddafbffbe77fc1283d7793   <-- commit object
+$ git cat-file -p 9c8563e
+100644 blob 9452e922fdbfa6ecabd62fd29fec3e821625c5f6    quote3.txt
 ```
 
-Now that the commit has been committed (you can check by using `git log`), lets take a look at the new file created. 
+This is what trees store: snapshots of the working directory.
+
+**If trees store a snapshot of the working directory, what exactly do commits store?**
+
+### Commit objects
+
+A git commit is a snapshot of a repository at a _point in time_. Commits wrap around a tree object with info about when it was created, who created it and why it was created.
+
+#### Create a commit
+
+We can create a commit based on a tree by using the `commit-tree` command. We'll also pipe in the commit message for the commit via stdin.
+
+```text {hl_lines=[2]}
+$ echo 'Wrote three quotes' | git commit-tree d77cacb
+5edebefd8e30ffd4bd13ab713689a1b66a62ad7d                <-- commit id
+```
+
+> _Note: If you're following the terminal commands - the commit id will be different for you. This is because the metadata involved in creating the id will be different between your repository and mine. The upcoming section explains why this is the case._
+
+The result is the commit id, which happens to be another object in the database:
+
+```text {hl_lines=[5]}
+.git/objects/94/52e922fdbfa6ecabd62fd29fec3e821625c5f6
+.git/objects/9c/8563e58a379f1f3e5366075401ea9a6f470591
+.git/objects/d7/7cacbb84e5369b537cd62d26d533e04798fab1
+.git/objects/8a/f3792c43bba0018127f036a6717c508e4b9cea
+.git/objects/5e/debefd8e30ffd4bd13ab713689a1b66a62ad7d   <-- commit object
+.git/objects/7a/aeff605349ee86ab6ed6f9d70ce5a617b596e9
+```
+
+Also let's make sure the current master branch points to this commit as the first commit. Usually `git commit` would set this, but this is not the case when using internal plumbing commands.
 
 ```text
-$ git cat-file -p e230e5
-tree a6dfdfda8182ac27a4f7ec9a3ef7fea562008686
-author Sanjay Narayana <snjay@users.noreply.github.com> 1614783692 +1100
-committer Sanjay Narayana <snjay@users.noreply.github.com> 1614783692 +1100
-
-Wrote about my love of mangoes
+$ git update-ref refs/heads/master 5edebef
 ```
 
-This is the contents of what is inside a commit file that is used by git. If we look at the individual lines, we'll notice some familiar friends.
+## 2. What information a commit stores
 
-`tree fc14c91` is simply a pointer the tree object we saw earlier which represents the state of the working directory at that time. It holds the whole repository's contents at the point of time the commit was made (this is why it's called a _snapshot_).
-
-The `author` refers to the individual which edited the files for this commit, whilst the `committer` is the person who actually created the commit. The reason a distinction is made between an author and a committer is because these can technically be two separate individuals. The distinction is only made when git history is edited or re-written with a command such as [git format-patch](https://mirrors.edge.kernel.org/pub/software/scm/git/docs/git-format-patch.html) or [git commit --amend](https://git-scm.com/docs/git-commit#Documentation/git-commit.txt---amend). If history is edited, then both the author of the commit _and_ the committer can be credited for their work.
-
-`Wrote about my love of mangoes` is our commit message written at the time the commit was created. This will be different if your commit message was different.
-
-One other line not visible here is the 'parent' line. When there is more than 1 commit on a branch, the line will refer to the parent commit that the child commit belongs to. Every subsequent commit made uses the previous commit as a parent commit, allowing it to be linked to the list of commits made previously. Following this chain of commits back will get you back to the first commit. The 'parent' is not shown in this output because this is the first commit made to a repository.
-
-## Commit ids
-
-Everytime we used a command in the previous section, git seemed to be spitting out some random letters and numbers to represent the different git objects. 
-
-**What exactly is a commit id string, and how is it generated?**
-
-The commit id is a 40 character long string uniquely identifying a commit made to the repository. The short answer is that the commit id is a SHA-1 hash of the commit's metadata.
-
-**[SHA-1](https://en.wikipedia.org/wiki/SHA-1)** is a hashing algorithm which works by taking in an some input and spitting out a 160 bit (40 character) hash. It is **one-way function**, which means it is easy to go convert an input into a hash, but difficult to go backwards to find the original input based on the output hash. 
-
-SHA-1 is part of a family of cryptographic hashing functions which are generally only found in cryptography or security scenarios. However SHA-1 wasn't initially chosen for it's cryptographic properties but only because it was just [considered a good hash](https://www.youtube.com/watch?v=4XpnKHJAok8&t=56m16s) for verifying data integrity. Since the 2017 SHAttered attack ([https://shattered.io/](https://shattered.io/)) which found a way to practically generate SHA-1 collisions, future versions of Git (v2.13.0 and up) moved to using a [stronger version of the SHA-1 implementation](https://git-scm.com/docs/hash-function-transition/) by default to deal with the collision attack.
-
-Let's try to generate our own commit id to understand how git does it internally.
-
-### How commit ids are created
-
-More formally, a git commit id is the SHA-1 hash of (1) a header, (2) a null terminator and (3) a data payload.
+The commit object is like any other object in the database: a file. This file can be opened up to see what is inside it. We can look inside the commit object ('5edebef') using the `git cat-file` command. This will let us see what information it stores.
 
 ```text
-commit_id = sha1(header + "\0" + data)
+$ git cat-file -p 5edebef
+tree d77cacbb84e5369b537cd62d26d533e04798fab1
+author Tommy Wiseau <t.wiseau@theroom.com> 1615298875 +1100
+committer Tommy Wiseau <t.wiseau@theroom.com> 1615298875 +1100
+
+Wrote three quotes
 ```
 
-- `header` consists of the word "commit" and the size of the 'data' in bytes.
-- `data` contains:
-    1. author - the person who edited the files
-    2. committer – the person who made the commit
-    3. creation time
-    4. a commit message - a message on the purpose of the commit
-    5. parent commit sha1
-    6. tree SHA-1 hash
+This is the output of the commit object file inside the database. You might notice some familiar friends inside the commit object! Others will be new.
 
-For simplicity, let's try re-create the latest commit id in our dummy repository which we made previously, that is: `14f1e1b20b9934f79cd6e06a61a6e5e31a09f683`
+- tree d77cacbb84e5369b537cd62d26d533e04798fab1 refers to the tree object created earlier.
+- author is whoever edited the files.
+- committer is the person who created the commit.
+- 'Wrote three quotes' is the commit message written at the time the commit was created. This will be different if your commit message was different.
 
-> _Note: The commit id I'll have created will be **different** to the commit id you generate because the author, committer and the creation time will all be different._
+The reason author and a committer are separate is because these can be two separate people. The distinction is only made clear when running commands such as [git format-patch](https://git-scm.com/docs/git-format-patch), [git commit --amend](https://git-scm.com/docs/git-commit#Documentation/git-commit.txt---amend) or [git merge](https://git-scm.com/docs/git-merge). These commands re-write history. If history is editable, then both the author of the commit _and_ the committer should be credited for their separate work.
 
-### Replicating the latest commit id
+Another entry not visible here, is 'parent'. Every new commit made sets it's parent commit as the previous commit made on the current branch. This linking allows every commit to link back to the previous commits made. Following this chain of commits back through time can get you back to the initial commit. The reason it is not visible here is because this is the first commit made to this repository. The first commit does not have a parent commit.
 
-In order to replicate the latest commit made to the repo, we need to form the `header` and the `data`. Let's save these into two separate shell variables so we understand what they are individually.
+Commits signed with a GPG key will also contain a signature below the commit message,
 
-```shell
-$ header=$(printf "commit %s" $(git cat-file commit HEAD | wc -c))
-$ echo $header
-commit 201
+```text {hl_lines=["6-11"]}
+tree d77cacbb84e5369b537cd62d26d533e04798fab1
+author Tommy Wiseau <t.wiseau@theroom.com> 1615298875 +1100
+committer Tommy Wiseau <t.wiseau@theroom.com> 1615298875 +1100
+
+Wrote three quotes
+gpgsig -----BEGIN PGP SIGNATURE-----
+hM1/PswpPLuBSr+oCIDj5GMC2r2iEKsfv2fJbNW8iWAXVLoWZRF8B0MfqX/YTMbm
+...
+8S5B/1SSQuEAjRZgI4IexpZoeKGVDptPHxLLS38fozsyi0QyDyzEgJxcJQVMXxVi
+=FSES
+-----END PGP SIGNATURE-----
 ```
 
-```shell
+**When we create commits, git seems to spit out a series of random letters and numbers for the commit's id. What do these mean, and how are they made?**
+
+## 3. How commit ids are generated
+
+The **commit id** is a 40 character long string uniquely identifying a commit made to the repository. A commit id is the result of a SHA-1 hash of a header and the commit file's contents ('data').
+
+### Introducing SHA-1
+
+**[SHA-1](https://en.wikipedia.org/wiki/SHA-1)** is a hashing algorithm which works by taking in an some input and spitting out a 160-bit (40-characters) hash. It is **one-way function**, which means it is easy to convert an input into a hash, but difficult to find the input given the hash.
+
+SHA-1 is part of a family of cryptographic hashing functions which are generally only found in cryptography or security scenarios. However SHA-1 wasn't initially chosen by Linus Torvalds for it's cryptographic properties. It was chosen because it was considered [a good hash](https://www.youtube.com/watch?v=4XpnKHJAok8&t=56m16s) for verifying data integrity.
+
+Since the [2017 SHAttered attack](https://shattered.io/) which found a way to practically generate SHA-1 collisions, future versions of Git (v2.13.0 and up) moved to using a [stronger version of the SHA-1](https://git-scm.com/docs/hash-function-transition/)  implementation to deal with the collision attack.
+
+### How to create a commit id
+
+The commit id is the SHA-1 hash of: (1) a header, (2) a null terminator and (3) a data payload.
+
+![commit id formula](/commit-id-formula.png)
+
+- 'header' consists of the word "commit" and the size of the data in bytes.
+- 'data' is the contents of the git object file exactly how it is shown in the previous section ([2. What information a commit stores](#2-what-information-a-commit-stores)). This information in this includes (1) author: the person who edited the files, (2) committer: the person who made the commit, (3) creation time, (4) a commit message: a message on the purpose of the commit, (5) parent commit sha1 and the (6) tree SHA-1 hash.
+
+When creating a new commit (say using `git commit`), git calculates the 'header' and 'data' at that point in time, and then runs it through the SHA-1 function to generate the commit id.
+
+### Replicating any repository's latest commit id
+
+To best understand how the commit id is made, let's re-create the latest commit id in a repository. 
+
+You can follow along by navigating to any repository with git. For this post, I'll be replicating the latest commit id I created in my dummy repository which is `5edebefd8e30ffd4bd13ab713689a1b66a62ad7d`.
+
+#### Form the header and data
+
+As per the input to the SHA-1 function, we need to form the 'header' and the 'data' of the input. First we will create the 'data', because the header requires it to calculate the size of it.
+
+```text
 $ data=$(git cat-file commit HEAD)
+```
+
+```text
 $ echo $data
-tree a6dfdfda8182ac27a4f7ec9a3ef7fea562008686
-author Sanjay Narayana <snjay@users.noreply.github.com> 1614778658 +1100
-committer Sanjay Narayana <snjay@users.noreply.github.com> 1614778658 +1100
+tree d77cacbb84e5369b537cd62d26d533e04798fab1
+author Tommy Wiseau <t.wiseau@theroom.com> 1615298875 +1100
+committer Tommy Wiseau <t.wiseau@theroom.com> 1615298875 +1100
 
-blah
+Wrote three quotes
 ```
 
-Let's combine them, along with the null terminating character to see what the input to the sha1 function will look like. You won't be able to see the "\0" in the shell output.
-
-```
-$ echo "$header\0$data"
-commit 201tree a6dfdfda8182ac27a4f7ec9a3ef7fea562008686
-author Sanjay Narayana <snjay@users.noreply.github.com> 1614778658 +1100
-committer Sanjay Narayana <snjay@users.noreply.github.com> 1614778658 +1100
-
-blah
-```
-
-Finally, piping this output into `sha1sum` (use `shasum` if you are using MacOS) will result in the commit id of our latest commit. Ta da!
+- The expression inside the $(), `git cat-file commit HEAD` returns contents of the latest commit of the current branch.
 
 ```text
-$ echo $header"\0"$data | sha1sum
-14f1e1b20b9934f79cd6e06a61a6e5e31a09f683  -
-```
-
-This is essentially what git does internally to generate a commit id hash. Obviously whilst the metadata available will be different when you create the commit (e.g. the creation time, author, size of content in bytes), this is the process that git uses to generate this commid id.
-
-If you're interested in where exactly the hash is calculated in the source code, you can take a look at the `write_object_file_prepare` function in the git source code, [here](https://github.com/git/git/blob/master/object-file.c#L1729-L1733).
-
-## Why are git objects stored in two character sub-directories?
-
-One oddity you may have noticed is that files in the object database were arranged by the first two characters of the hash as a directory and the rest of the hash is the file.
-
-```text
-14f1e1b20b9934f79cd6e06a61a6e5e31a09f683                  <-- commit id
-.git/objects/14/f1e1b20b9934f79cd6e06a61a6e5e31a09f683    <-- git object file
+$ header=$(printf "commit %s" $(echo $data | wc -c))
 ```
 
 ```text
-.git/
-└── objects/
-    ├── 01/
-    │   └── bf8f94800cafb22f589104b3c6a9743c84b053
-    ├── 14/
-    │   └── f1e1b20b9934f79cd6e06a61a6e5e31a09f683
-    ├── 3b/
-    │   └── da87e5cf72eada744b504213d49357b3a37b00
-    ├── a6/
-    │   └── dfdfda8182ac27a4f7ec9a3ef7fea562008686
-    └── e2/
-        └── 30e577b1c73e2d94ddafbffbe77fc1283d7793
+$ echo $header
+commit 189
 ```
 
-The answer to this is quite simply for efficiency reasons. Git relies on the object database `.git/objects` directory to store and retrieve git objects. Accessing these files efficiently is key to keeping git fast. This is only true for simple loose objects. If and when things get a little hectic, git uses something called [pack-files](https://git-scm.com/book/en/v2/Git-Internals-Packfiles) to store and access these files more efficiently, I won't cover these here.
+- The `wc -c` piped in after the 'echo $data' calculates the number of bytes of the data.
 
-**How many sub-directories are possible?**
+Let's take a look at how the input to the SHA-1 will look. The input is the header and the data variables, with a "\0" between them.
 
-The total number of directories within the `.git/objects` directory are $$16^2 = 256$$ directories (two characters, each with a choice of 16 hexadecimal letters).
+```text
+$ echo $header"\0"$data
+commit 189 tree d77cacbb84e5369b537cd62d26d533e04798fab1
+author Tommy Wiseau <t.wiseau@theroom.com> 1615298875 +1100
+committer Tommy Wiseau <t.wiseau@theroom.com> 1615298875 +1100
 
-When git wants to find a loose object based on an id such as `14f1e1b20b9934f79cd6e06a61a6e5e31a09f683`, all it has to do is look at the first two characters to find the sub-directory `14/` and then search for the rest of the id within the smaller directory `f1e1b20b9934f79cd6e06a61a6e5e31a09f683`.
+Wrote three quotes
+```
 
-Think about the situation that git _doesn't_ store files inside these two-character directories and instead places all the files into the root `.git/objects` directory. In this situation, everytime git wants to find an object with it's id, it would need to perform a linear scan of the entire directory everytime to find a specific git object.
+> _Note: The "\0" is not visible in the shell output._
 
-The cool thing about SHA-1 is that it distributes it's hashes well (even across the first two letters) which means it can splay the individual git object files well across the sub-directories without putting too many of the files into a small subset of two-character bucket.
+#### Hash the input with SHA-1
 
-Another reason is also because some older file systems (such as [ext-2](https://en.wikipedia.org/wiki/Ext2#File-system_limits) and [ext-3](https://en.wikipedia.org/wiki/Ext3#Disadvantages)) disallow more than ~32k subdirectories within a directory which happens _quite_ quickly for a non-trivial git repository.
+Finally, we pipe this input into the SHA-1 command. Use `shasum` (or `sha1sum` if you are on Linux) and the output will be the commit id of our latest commit. Ta da!
 
-## Conclusion
+```text
+$ echo $header"\0"$data | shasum
+5edebefd8e30ffd4bd13ab713689a1b66a62ad7d  -
+```
 
-To sum it all up, git stores commits as zlib-encrypted text files inside the `.git/objects` folder. The name of these object files is the SHA-1 hash of a combination of items including a pointer to the source tree, the author, committer and a commit message. Also a small header is pre-pended to the hash function containing the word 'commit' and the size of the data in bytes.
+Whilst the data would be different for you when git creates a commit, this is how git generates this commit id. The  `write_object_file_prepare` function in the git source code calculates this hash. You can take a look at the source code [here](https://github.com/git/git/blob/master/object-file.c#L1729-L1733) if interested.  
 
-We also replicated our own SHA-1 of the latest commit object to better understand how git is doing it under the hood. And finally, we explored the structure of the directory and why git uses two-character length sub-directories - for efficiency
+### Why are commit object files stored in two character sub-directories?
 
-_Thanks for reading, I hope you found this post insightful!_
+An observation you may have made is that objects in the database look different to the commit ids/hashes used. The hash is a 40-length string. But, the database object is the first two characters as a sub-directory. Then last hash's last 38 characters is the file name.
+
+```text
+5edebefd8e30ffd4bd13ab713689a1b66a62ad7d                  <-- commit id
+.git/objects/5e/debefd8e30ffd4bd13ab713689a1b66a62ad7d    <-- git object file ('loose object')
+```
+
+The structure of the object database looks like the following. Objects stored like this are called '**loose objects**.'
+
+```text {hl_lines=[2,3]}
+.git/objects
+├── 5e
+│   └── debefd8e30ffd4bd13ab713689a1b66a62ad7d
+├── 7a
+│   └── aeff605349ee86ab6ed6f9d70ce5a617b596e9
+├── 8a
+│   └── f3792c43bba0018127f036a6717c508e4b9cea
+├── 94
+│   └── 52e922fdbfa6ecabd62fd29fec3e821625c5f6
+├── 9c
+│   └── 8563e58a379f1f3e5366075401ea9a6f470591
+├── d7
+│   └── 7cacbb84e5369b537cd62d26d533e04798fab1
+├── info
+└── pack
+```
+
+There are a few answers for the different formats between the commit id (hash) and the database object.
+
+1. **Sub-directory limits:** Some older file systems only allow a certain number of files in a directory. For example, [ext-2](https://en.wikipedia.org/wiki/Ext2#File-system_limits) and [ext-3](https://en.wikipedia.org/wiki/Ext3#Disadvantages) allow a maximum of ~32k sub-directories within a directory. Reaching this limit can occur quite quickly for large git repositories. The cool thing about SHA-1 is that it distributes it's hashes well (even across the first two letters) which means it can splay the individual files across the sub-directories without putting too many of the files into the same two-character bucket.
+
+2. **Efficiency:** Git relies on the object database to store and retrieve most git objects. Efficient access to these files keeps git fast.
+
+Think about the situation that git _doesn't_ store files inside 2-character sub-directories. Instead, it would have to place all loose objects into the root `.git/objects` directory. Every time git wants to find an object using an id, it would need to perform a linear scan of the entire directory. Adding a layer of separation, limits the initial search space to a maximum of 256 (2^16) sub-directories.
 
 ## Resources
 
-Here is a collection of the resources if you'd like to learn more about git commits.
+Here are a collection of resources if you'd like to learn more about git commits.
 
-- Replicate SHA-1 commit id: https://gist.github.com/masak/2415865
+- Replicating the SHA-1 commit id: https://gist.github.com/masak/2415865
+- Plumbing and Porcelain: https://git-scm.com/book/en/v2/Git-Internals-Plumbing-and-Porcelain
+- Short ids: https://git-scm.com/book/en/v2/Git-Tools-Revision-Selection
 
-
-[^1]: There is one more object type called a 'tags.' However this post won't cover them.
+_Thanks for reading!_
