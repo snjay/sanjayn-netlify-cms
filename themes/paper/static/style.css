@@ -426,7 +426,7 @@ img {
 }
 /* inline */
 .post-content .highlight span {
-  background: transparent !important;
+  background: rgba(170, 170, 100, 0.3) !important;
 }
 
 .post-content code {

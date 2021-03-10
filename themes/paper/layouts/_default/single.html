@@ -10,6 +10,14 @@
     </div>
   </header>
   <div class="post-content">{{ .Content }}</div>
+  {{- if .Params.showCoffee }}
+  <div id="buy-me-a-coffee" style="text-align: center;">
+    <p>If you enjoyed this post, feel free to shout me a coffee 🙂</p><br/>
+    <div id="buy-me-a-coffee-btn" style="display: flex; justify-content: center;">
+      <a href="https://www.buymeacoffee.com/sanjayn" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
+    </div>
+  </div>
+  {{- end }}
   {{- if .Params.tags }}
   <footer class="post-footer">
     <ul class="post-tags">
