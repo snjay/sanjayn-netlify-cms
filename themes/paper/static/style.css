@@ -425,9 +425,6 @@ img {
   display: none;
 }
 /* inline */
-.post-content .highlight span {
-  background: rgba(170, 170, 100, 0.3) !important;
-}
 
 .post-content code {
   margin-left: 4px;

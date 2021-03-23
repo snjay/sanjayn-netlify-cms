@@ -94,7 +94,7 @@ Next, find all the different ways the operations go between the numbers.
 
 For 4 numbers, only be 3 operations can go between the numbers.
 
-```plain
+```text
 1 + 2 x 3 + 4
 ```
 
@@ -193,9 +193,6 @@ const evaluate = (expr) => {
         case "^":
           stack.push(Math.pow(second, first));
           break;
-        // case "√":
-        //   stack.push(Math.pow(second, 1 / first));
-        //   break;
         default:
           console.log('A problem has occurred.');
       }
